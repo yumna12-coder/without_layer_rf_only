@@ -87,7 +87,7 @@ st.markdown("<h1 style='text-align: center; color: white;'>ML-based Intrusion De
 st.markdown("<h4 style='text-align: center; color: white;'>Protect your network with the power of Machine Learning 🛡️</h4>", unsafe_allow_html=True)
 
 # -------------------- Load Model -------------------- #
-model_path = "no_layering_rf_model.joblib"
+model_path = "no_layering_rf_model (1).joblib"
 
 try:
     model = joblib.load(model_path)
@@ -104,6 +104,10 @@ label_map = {
     3: 'Recon Flood',
     4: 'MQTT Flood'
 }
+
+# Reverse mapping for string to number
+str_to_num = {v: k for k, v in label_map.items()}
+
 attack_descriptions = {
     0: 'Normal, harmless network traffic.',
     1: 'Denial of Service attack using flooding.',
@@ -175,10 +179,16 @@ if uploaded_file_with_label is not None:
         else:
             X = data_label.drop(columns=['Attack Name'])
             y_true = data_label['Attack Name']
+            
+            # Debug information
+            st.write("### Unique values in Attack Name column:")
+            st.write(y_true.unique())
 
-            # Map string labels to numbers for comparison
-            str_to_num = {v: k for k, v in label_map.items()}
-            y_true_num = y_true.map(str_to_num)
+            # Convert string labels to numbers if they're strings
+            if y_true.dtype == 'object':  # if labels are strings
+                y_true_num = y_true.map(str_to_num)
+            else:  # if labels are already numbers
+                y_true_num = y_true
 
             st.write("### Dataset Preview:")
             st.dataframe(data_label.head())
